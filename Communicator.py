@@ -10,6 +10,12 @@ class COMMUNICATOR:
         self.sock = sock
         self.sock.setblocking(False)
        
+    def accept(self):
+        try:
+            return self.sock.accept()
+        except:
+            return None
+
     def send(self, msg):
         if isinstance(msg, str):
             try:
