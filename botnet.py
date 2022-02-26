@@ -1,8 +1,11 @@
 import socket
 import subprocess
 from Communicator import COMMUNICATOR
+from Downloader import Download
 
+ALL_ACTIONS = {
 
+}
 
 if __name__ == "__main__":
         sock = socket.socket()
