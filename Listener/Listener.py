@@ -90,7 +90,7 @@ class SERVER:
         f.close()
 
     # laucher to send files
-    def SendFiles(self, path):
+    def SendFile(self, path):
         _thread.start_new_thread(self._SendFile(path, self.DataToSend))
 
 
