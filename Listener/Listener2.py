@@ -1,6 +1,5 @@
 import socket
 import os, sys
-from symbol import pass_stmt
 import _thread
 import time
 
