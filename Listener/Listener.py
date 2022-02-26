@@ -1,6 +1,5 @@
 import socket
 import os, sys
-from symbol import pass_stmt
 import _thread
 import queue
 import time
@@ -57,6 +56,11 @@ class SERVER:
                 self.UpdateClient(client[1], client[0])
             else:
                 break
+
+    def SendToClients(self, data):
+        for i in self.clients:
+            sock = i[0]
+            sock.send(data)
     
     def MainLoop(self, in_, out_):
         while True:
@@ -66,21 +70,28 @@ class SERVER:
             if out_.qsize == 0:
                 out_.put(self.clients)
 
-            try:
-                cmd = in_.get(False) # get without blocking
-            except:
-                pass
+            data = self.DataToSend.get(False)
+            self.SendToClients(self.DataToSend)
+                
 
-            if self.DataToSend
 
 
     ####### Action #######
     # This send file
-    def SendFile(self, path):
-        f = open(path, 'r')
-        data = f.read(SEND_FILE_BUFFER)
-        self.sock.send(data)
+    def _SendFile(self, path, q):
+        path = path.replace('\\', '/') # make sure path is in linux form
+        name = path.split('/') # get the name
+        size = os.path.getsize(path)[-1]
+        q.put(f'DOWNLOAD "{name}" {size}\n') # \n is for detecting when the header stops
+        f = open(path, 'rb')
+        while f:
+            data = f.read(SEND_FILE_BUFFER)
+            q.put(data)
+        f.close()
 
+    # laucher to send files
+    def SendFiles(self, path):
+        _thread.start_new_thread(self._SendFile(path, self.DataToSend))
 
 
 if __name__ == "__main__":
