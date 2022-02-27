@@ -20,7 +20,7 @@ from Communicator import COMMUNICATOR
 class SERVER:
     def __init__(self, ip, port):
         self.clients = {}
-        self.ACTION = {
+        self.ACTIONS = {
             'UPLOAD': self.SendFile,
         }
 
@@ -36,6 +36,7 @@ class SERVER:
 
     # add a client to the list
     def UpdateClient(self, addr, conn):
+        conn = COMMUNICATOR(conn)
         self.clients[addr] = (conn, time.time()) # Insert/Update client socket/time
 
     # Remove clients is passed the timeout
@@ -47,6 +48,7 @@ class SERVER:
 
         for i in todelete:
             del self.clients[k]
+
 
     # Accept all clients
     def AcceptClients(self):
@@ -63,68 +65,73 @@ class SERVER:
             sock.send(data)
     
     def MainLoop(self, in_, out_):
+        EnableInput = True
         while True:
             self.AcceptClients()
             self.ClientTimeouts()
+            
             if out_.qsize == 0:
                 out_.put(self.clients)
 
-            data = self.DataToSend.get(False)
-            self.SendToClients(self.DataToSend)
-
             try:
-                data = self.DataToSend.get(False)
+                data = data_.get(False)
                 print(data)
             except:
                 EnableInput = True
             else:
                 EnableInput = False
                 self.SendToClients(data)
-
+        
+            
             if EnableInput:
                 try:
-                    i = in_.get(False)
+                    i = in_.get()
                 except:
                     pass
                 else:
-                    print("Got Input")
-                    li = i.split(' ') [0]
-                    if li[0] in self.ACTIONS:
-                        self.ACTIONS[li[0]](i)
+                    li = i.split(' ')[0]
+                    if li in self.ACTIONS:
+                        self.ACTIONS[li](i, self.DataToSend)
+
 
 
     ####### Action #######
     # This send file
-    def _SendFile(self, path, sendQ):
+    def _SendFile(path, sendQ):
         path = path.replace('\\', '/') # make sure path is in linux form
-        name = path.split('/') # get the name
-        size = os.path.getsize(path)[-1]
+        name = path.split('/')[-1] # get the name
+        size = os.path.getsize(path)
+        #       0           1       2
         print('SENDING DOWNLOAD EVENT')
         sendQ.put(f'DOWNLOAD "{name}" {size}\n') # \n is for detecting when the header stops
+        print("SENT")
+
         f = open(path, 'rb')
         while f:
             data = f.read(SEND_FILE_BUFFER)
             sendQ.put(data)
         f.close()
+
     # laucher to send files
-    def SendFile(self, path):
+    def SendFile(self, inp):
         inp = inp.split(' ')
         if len(inp) > 1:
             path = ' '.join(inp[1:])
         else:
             print('PATH NOT INITIALIZED')
-            return 1
-        print("Sending")         
-        _thread.start_new_thread(self._SendFile(path, self.DataToSend))
+            return 1    
+        _thread.start_new_thread(self._SendFile, (path, self.DataToSend))
+        return 0
 
 if __name__ == "__main__":
     s = SERVER('127.0.0.1', 8080)
     in_ = queue.Queue()
     out_ = queue.Queue()
-    _thread.start_new_thread(s.MainLoop, (in_, out_))
+    data_ = queue.Queue()
+    _thread.start_new_thread(s.MainLoop, (in_, out_, data_))
 
     while True:
-        os.system("cls")
+        #os.system("cls")
         i = input('> ')
         if i:
-            input(i)
+            in_.put(i)

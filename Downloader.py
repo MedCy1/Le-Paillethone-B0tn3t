@@ -12,7 +12,7 @@ def Download(sock, args):
 
     data = '\n'.join(args.split(b'\n'[1:]))
 
-    _Download(sock , filename, size, data)
+    return _Download(sock , filename, size, data)
 
 def _Download(sock, filename, size, data = b''):
     f = open(filename, 'wb')
