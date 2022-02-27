@@ -9,6 +9,7 @@ class COMMUNICATOR:
     def __init__(self, sock):
         self.sock = sock
         self.sock.setblocking(False)
+        self.IsConnected = True
        
     def accept(self):
         try:
@@ -36,6 +37,7 @@ class COMMUNICATOR:
             try:
                 d = self.sock.recv(DEFAULT_BUFFER)
                 if d == b'':
+                    self.close()
                     return data
                 data += d
             except:
@@ -45,3 +47,4 @@ class COMMUNICATOR:
     def close(self):
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
+        self.IsConnected = False

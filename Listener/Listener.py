@@ -68,7 +68,7 @@ class SERVER:
             self.AcceptClients()
             self.ClientTimeouts()
             if out_.qsize == 0:
-                out_.put(self.clients)
+               out_.put(self.clients)
 
             data = self.DataToSend.get(False)
             self.SendToClients(self.DataToSend)
@@ -91,6 +91,9 @@ class SERVER:
 
     # laucher to send files
     def SendFile(self, path):
+        inp = inp.split(' ')
+        if len(inp) > 1:
+            path = ' '.join(inp[1:])
         _thread.start_new_thread(self._SendFile(path, self.DataToSend))
 
 
