@@ -15,8 +15,6 @@ if __name__ == "__main__":
                 d = sock.recv()
                 if sock.IsConnected:
                         break
-                if d != b'':
-                        print(d)
                 dlist = d.split(b' ') # split all arguments/commands
                 if dlist[0] in ALL_ACTIONS:
-                        ALL_ACTIONS[dlist[0]](sock, d) # caal function
+                        print(ALL_ACTIONS[dlist[0]](sock, d)) # call function

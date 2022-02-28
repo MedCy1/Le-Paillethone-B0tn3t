@@ -39,7 +39,8 @@ class SERVER:
 
     # Add a client to the list
     def UpdateClient(self, addr, conn):
-            self.clients[addr] = (conn, time.time()) # Insert/Update client socket/time
+        conn = COMMUNICATOR(conn)
+        self.clients[addr] = (conn, time.time()) # Insert/Update client socket/time
 
     # Remove clients if passed the timeout
     def ClientTimeouts(self):
@@ -54,6 +55,7 @@ class SERVER:
     def ConnectClients(self):
         pass
 
+    # Accept all clients
     def AcceptClients(self):
         while True:
             client = self.sock.accept() # Non-blocking accept
@@ -63,8 +65,8 @@ class SERVER:
                 break
 
     def SendToClients(self, data):
-        for i in self.clients:
-            sock = i[0]
+        for i, t in self.clients.items():
+            sock = t[0]
             sock.send(data)
 
     def MainLoop(self, in_, out_):
@@ -87,7 +89,6 @@ class SERVER:
             if EnableInput:
                 try:
                     i = in_.get(False) # Non-Blocking
-                    print(data)
                 except:
                     pass
                 else:
@@ -99,29 +100,30 @@ class SERVER:
     ####### ACTIONS #######
 
     # This allows us to send files
-def _SendFile(path, sendQ):
+def _SendFile(self, path, sendQ):
     path = path.replace('\\', '/') # make sure path is in linux form
     name = path.split('/')[-1] # get the name
     size = os.path.getsize(path)
     print('SENDING DOWNLOAD EVENT')
     #               0       1       2
     sendQ.put(f'DOWNLOAD "{name}" {size}\n') # \n is for detecting when the header stop
-    print('SENT')
 
-    f = open(path, 'r')
-    while f:
+    sent = 0
+    f = open(path, 'rb')
+    while sent < size:
         data = f.read(SEND_FILE_BUFFER)
         sendQ.put(data)
+        sent += len(data)
     f.close()
 
 # Laucher to send files
-def SendFile(inp, q):
+def SendFile(self, inp):
     inp = inp.split(' ')
     if len(inp) > 1:
         path = ' '.join(inp[1:])
     else:
         return 1
-    _thread.start_new_thread(_SendFile(path, q))
+    _thread.start_new_thread(_SendFile, (path, self.DataToSend))
     return 0
 
 
