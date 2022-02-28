@@ -25,7 +25,7 @@ class SERVER:
     def __init__(self, ip, port):
         self.clients = {}
         self.ACTIONS = {
-            'UPLOAD': self.SendFile,
+            'UPLOAD': SendFile,
         }
 
         sock = socket.socket()
@@ -68,41 +68,71 @@ class SERVER:
             sock.send(data)
 
     def MainLoop(self, in_, out_):
+        EnableInput = True
         while True:
-            os.system('cls')
             self.AcceptClients()
             self.ClientTimeouts()
             if out_.qsize == 0:
                 out_.put(self.clients)
             
+            try:
+                data = self.DataToSend.get(False) # Non-Blocking
+            except:
+                EnableInput = True
+            else:
+                EnableInput = False
+                self.SendToClients(data)
 
-            data = self.DataToSend.get(False)
-            self.SendToClients(self.DataToSend)
+
+            if EnableInput:
+                try:
+                    i = in_.get(False) # Non-Blocking
+                    print(data)
+                except:
+                    pass
+                else:
+                    li = i.split(' ')[0]
+                    if li in self.ACTIONS:
+                        self.ACTIONS[li](i, self.DataToSend)
             
 
     ####### ACTIONS #######
 
     # This allows us to send files
-    def _SendFile(self, path, q):
-        path = path.replace('\\', '/') # make sure path is in linux form
-        name = path.split('/')[-1] # get the name
-        size = os.path.getsize(path)
-        #           0       1       2
-        q.put(f'DOWNLOAD "{name}" {size}\n') # \n is for detecting when the header stop
+def _SendFile(path, sendQ):
+    path = path.replace('\\', '/') # make sure path is in linux form
+    name = path.split('/')[-1] # get the name
+    size = os.path.getsize(path)
+    print('SENDING DOWNLOAD EVENT')
+    #               0       1       2
+    sendQ.put(f'DOWNLOAD "{name}" {size}\n') # \n is for detecting when the header stop
+    print('SENT')
 
-        f = open(path, 'r')
-        while f:
-            data = f.read(SEND_FILE_BUFFER)
-            q.put(data)
-        f.close()
+    f = open(path, 'r')
+    while f:
+        data = f.read(SEND_FILE_BUFFER)
+        sendQ.put(data)
+    f.close()
 
-    # Laucher to send files
-    def SendFile(self, path):
-        _thread.start_new_thread(self._SendFile(path, self.DataToSend))
+# Laucher to send files
+def SendFile(inp, q):
+    inp = inp.split(' ')
+    if len(inp) > 1:
+        path = ' '.join(inp[1:])
+    else:
+        return 1
+    _thread.start_new_thread(_SendFile(path, q))
+    return 0
 
 
 if __name__ == "__main__":
     s = SERVER('127.0.0.1', 8080)
     in_ = queue.Queue()
     out_ = queue.Queue()
-    s.MainLoop()
+    _thread.start_new_thread(s.MainLoop, (in_, out_))
+
+    while True:
+        os.system('cls')
+        i = input('> ')
+        if i:
+            in_.put(i)
