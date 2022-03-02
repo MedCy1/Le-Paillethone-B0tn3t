@@ -3,10 +3,8 @@ import os, sys
 import _thread
 import queue
 import time
-
-from h11 import ConnectionClosed
+import Downloader
 from Downloader import Download
-
 from botnet import ALL_ACTIONS
 
 CLIENT_TIMEOUT =  30 # seconds
