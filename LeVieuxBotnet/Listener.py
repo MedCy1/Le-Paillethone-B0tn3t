@@ -3,9 +3,9 @@ import os, sys
 import _thread
 import queue
 import time
-import Downloader
-from Downloader import Download
-from botnet import ALL_ACTIONS
+import LeVieuxBotnet.Downloader as Downloader
+from LeVieuxBotnet.Downloader import Download
+from LeVieuxBotnet.botnet import ALL_ACTIONS
 
 CLIENT_TIMEOUT =  30 # seconds
 MAXIMUM_CLIENTS = 100 # seconds
