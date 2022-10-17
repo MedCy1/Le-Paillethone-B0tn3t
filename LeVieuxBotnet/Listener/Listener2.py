@@ -15,7 +15,7 @@ os.chdir('..')
 sys.path.append(os.getcwd())
 os.chdir(cwd)
 
-from Communicator import COMMUNICATOR
+from LeVieuxBotnet.Communicator import COMMUNICATOR
 
 class SERVER:
     def __init__(self, ip, port):

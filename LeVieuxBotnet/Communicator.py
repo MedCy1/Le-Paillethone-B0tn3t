@@ -22,7 +22,7 @@ class COMMUNICATOR:
             try:
                 msg = msg.encode('utf-8')
             except:
-                return
+                return # Silently fallback
         elif not isinstance(msg, bytes):
             return
 
@@ -37,6 +37,7 @@ class COMMUNICATOR:
             try:
                 d = self.sock.recv(DEFAULT_BUFFER)
                 if d == b'':
+
                     self.close()
                     return data
                 data += d

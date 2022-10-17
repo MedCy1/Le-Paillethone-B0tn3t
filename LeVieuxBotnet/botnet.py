@@ -1,9 +1,10 @@
 import socket
+import subprocess
 from Communicator import COMMUNICATOR
 from Downloader import Download
 
 ALL_ACTIONS = {
-        'DOWNLOAD': Download
+        b'DOWNLOAD': Download
 }
 
 if __name__ == "__main__":
@@ -12,10 +13,8 @@ if __name__ == "__main__":
         sock = COMMUNICATOR(sock)
         while True:
                 d = sock.recv()
-                if not sock.IsConnected:
+                if sock.IsConnected:
                         break
-                if d != b'':
-                        print(d)
-                dlist = d.split(b' ') # split all arguments/command
+                dlist = d.split(b' ') # split all arguments/commands
                 if dlist[0] in ALL_ACTIONS:
-                        ALL_ACTIONS[dlist[0]](d, sock) # caLL function
+                        print(ALL_ACTIONS[dlist[0]](sock, d)) # call function

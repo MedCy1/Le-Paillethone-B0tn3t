@@ -1,0 +1,1 @@
+"Error during command execution: Command 'help' returned non-zero exit status 1.""Error during command execution: Command 'upload test.txt' returned non-zero exit status 1.""Error during command execution: Command 'download test2.txt' returned non-zero exit status 1."
