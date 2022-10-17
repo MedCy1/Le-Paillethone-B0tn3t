@@ -1,7 +1,7 @@
 
 
 
-
+# Argument Parser
 def Download(sock, args):
     filename = args.split(b'"')[1].decode('utf-8') #decode to string
     size = args.split(b' ')[2].split(b'\n')[0].decode("utf-8") #split size and decode to strign
@@ -10,7 +10,7 @@ def Download(sock, args):
     #if we got data because of fast internet connection
     #or whatever may have happened
 
-    data = '\n'.join(args.split(b'\n'[1:]))
+    data = b'\n'.join(args.split(b'\n'[1:]))
 
     return _Download(sock , filename, size, data)
 
